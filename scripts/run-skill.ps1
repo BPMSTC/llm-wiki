@@ -51,7 +51,7 @@ $prompt = "/$Skill"
 
 Write-Log "Invoking: claude -p `"$prompt`" --model $Model --permission-mode acceptEdits --allowedTools `"$allowedTools`""
 
-$claudeOutput = & claude -p $prompt --model $Model --permission-mode acceptEdits --allowedTools $allowedTools 2>&1
+$claudeOutput = "" | & claude -p $prompt --model $Model --permission-mode acceptEdits --allowedTools $allowedTools 2>&1
 $claudeExit = $LASTEXITCODE
 Add-Content -Path $LogFile -Value $claudeOutput
 
