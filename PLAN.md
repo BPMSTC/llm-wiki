@@ -307,41 +307,28 @@ Chosen shape, per Brent's answers: capture stays manual (files dropped into loca
 
 Two things make unattended execution safe: **scoped permissions** (so headless Claude Code can act without a human approving prompts, but only for the specific tools this needs) and **a wrapper script that treats "nothing to do" as success and never force-pushes.**
 
-### 5.1 Scoped permissions — `.claude/settings.json`
+### 5.1 Scoped permissions — CLI flags, not a repo-wide settings file
 
-Headless invocation needs to run without interactive approval prompts (nobody's there to click "yes"), but a blanket bypass-all-permissions flag is more than this job needs. Add a project-level allowlist instead, so the automation can only do exactly what ingest/synthesize require — read/write files in the repo and run git:
+Verified against the installed CLI (`claude --help`): headless mode is `-p/--print`, and `--allowedTools <tools...>` pre-approves specific tool patterns without prompting (e.g. `"Read Write Edit Bash(git add:*)"` — space-separated inside one string, per the CLI's own example). `--permission-mode` also exists (`acceptEdits`, `auto`, `bypassPermissions`, `manual`, `dontAsk`, `plan`).
 
-```json
-{
-  "permissions": {
-    "allow": [
-      "Read",
-      "Write",
-      "Edit",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(git pull:*)",
-      "Bash(git status:*)",
-      "Bash(git log:*)"
-    ]
-  }
-}
+Decision: scope permissions **on the invocation itself** (`--allowedTools`, per-call) rather than writing a project `.claude/settings.json`. A repo-wide settings file would also loosen permissions for Brent's own interactive sessions in this repo — unnecessary, since CLAUDE.md's "don't push unless asked" rule already governs interactive behavior, and the automation's scope should live with the automation, not the repo. Do **not** use `--dangerously-skip-permissions`/`bypassPermissions` — `--allowedTools` scoped to exactly what ingest/synthesize need is sufficient and much narrower:
+
 ```
-
-Verify the exact permission-string syntax and the current headless-invocation flag (`claude -p "<prompt>"` plus whatever permission-mode flag the installed CLI version uses — check `claude --help`) before wiring the wrapper script; CLI flags drift between versions and this plan shouldn't be trusted blindly over `--help`.
+--allowedTools "Read Write Edit Bash(git add:*) Bash(git commit:*) Bash(git push:*) Bash(git pull:*) Bash(git status:*) Bash(git log:*) Bash(git mv:*)"
+--permission-mode acceptEdits
+```
 
 ### 5.2 Wrapper script — `scripts/run-skill.ps1`
 
-One parameterized PowerShell script, invoked with `-Skill ingest` or `-Skill synthesize`, responsible for:
+One parameterized PowerShell script (`-Skill ingest|synthesize`, `-Model` default `sonnet`), responsible for:
 
-1. `cd` into the repo.
+1. Resolve the repo root from `$PSScriptRoot` and `Set-Location` there (so it works regardless of what directory Task Scheduler launches from).
 2. `git pull --ff-only` — if this fails (diverged history, e.g. Brent committed from elsewhere), abort loudly before touching anything. Never force-pull or force-push.
-3. Invoke headless Claude Code with the corresponding skill prompt (`/ingest` or `/synthesize`), using the scoped permissions from 5.1.
-4. Capture all stdout/stderr to a timestamped file under `automation-logs/` (gitignored — this is operational run history, not wiki content, and is separate from `log.md`, which stays the semantic record the wiki maintainer writes about itself).
-5. Treat "inbox was empty, nothing to ingest" as success, not failure — that's the expected common case for a daily job.
-6. After the skill completes, if there are new commits: `git push`. If push fails for any reason, log it clearly and exit non-zero (so Task Scheduler's history shows a failure) — leave the local commit intact rather than retrying destructively or force-pushing.
-7. Exit 0 only when the whole sequence succeeded (including push, once auto-push is enabled).
+3. Invoke headless Claude Code: `claude -p "/$Skill" --model $Model --permission-mode acceptEdits --allowedTools "<scoped list>"`.
+4. Capture all stdout/stderr to a timestamped file under `automation-logs/` (gitignored — operational run history, separate from `log.md`, which stays the semantic record the wiki maintainer writes about itself).
+5. Treat "inbox was empty, nothing to ingest" as success: check `git log origin/main..HEAD` after the skill runs — no new commits means nothing to push, exit 0.
+6. If there are new commits, `git push`. If push fails for any reason, log it clearly and exit non-zero (so Task Scheduler's history shows a failure) — leave the local commit intact rather than retrying destructively or force-pushing.
+7. Exit 0 only when the whole sequence succeeded (including push, when there was something to push).
 
 ### 5.3 Task Scheduler entries
 
