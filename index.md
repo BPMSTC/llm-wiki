@@ -12,3 +12,4 @@ The catalog of every page in `wiki/`. Updated on every ingest. One line per page
 ## This Repo
 
 - [[llm-wiki-repo]] — BPMSTC/llm-wiki, this repo's implementation of the pattern.
+- [[scheduled-automation]] — the Task Scheduler wrapper that runs ingest/synthesize unattended with scoped permissions.

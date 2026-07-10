@@ -1,0 +1,3 @@
+Test note for verifying the run-skill.ps1 headless automation wrapper. This note exists only to prove that a scheduled, non-interactive Claude Code invocation can read a file dropped in inbox/, file it into sources/ with a date prefix, and write or update wiki pages — without any human clicking through a permission prompt.
+
+The wrapper script that triggers this run scopes its permissions narrowly to file reads/writes and a specific allowlist of git subcommands (add, commit, push, pull, status, log, mv), rather than bypassing permission checks entirely, and it is meant to eventually run daily from Windows Task Scheduler once Brent trusts the output from manual use.

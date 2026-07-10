@@ -11,6 +11,8 @@ Three recurring operations keep a [[karpathy-llm-wiki-pattern]]-style wiki both 
 
 In [[llm-wiki-repo]], these three operations are implemented as Claude Code skills (`/ingest`, `/lint`, `/synthesize` — synthesize being a weekly-rollup variant not present in Karpathy's original description, added from the [[capture-workflow]] idea) rather than left as freeform conventions. The reasoning: a skill behaves identically whether triggered by hand or by an unattended scheduled task, whereas a remembered convention drifts session to session.
 
+That "unattended scheduled task" half is what [[scheduled-automation]] implements: a wrapper script for Windows Task Scheduler that invokes ingest/synthesize headlessly with tool permissions scoped down to file I/O and a git subcommand allowlist, rather than skipping permission checks entirely.
+
 Two supporting files anchor these operations across both the original pattern and this implementation: an index (`index.md`) cataloging every wiki page with a one-line summary, and a log (`log.md`) that is an append-only, timestamped record of every ingest, query-save, and lint pass — distinct from git history, since the log captures intent ("why") while git captures the mechanical diff ("what").
 
 ## Related
@@ -19,8 +21,10 @@ Two supporting files anchor these operations across both the original pattern an
 - [[three-layer-architecture]] — the layers these operations act across
 - [[llm-wiki-repo]] — where these operations are implemented as skills
 - [[capture-workflow]] — contributed the synthesize/weekly-rollup operation
+- [[scheduled-automation]] — runs ingest/synthesize unattended via Task Scheduler
 
 ## Sources
 
 - [[sources/2026-07-10-karpathy-llm-wiki-pattern]] — describes ingest, query, and lint
 - [[sources/2026-07-10-llm-wiki-repo-design]] — describes the skills implementation and the log-vs-git distinction
+- [[sources/2026-07-10-automation-test-note]] — describes the headless invocation and permission scoping
