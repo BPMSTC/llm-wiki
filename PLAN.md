@@ -299,14 +299,65 @@ Prove the pipeline works end-to-end with real material:
 
 ---
 
-## Phase 5: Automation (Brent does this later — NOT part of Sonnet's build)
+## Phase 5: Automation (local Windows Task Scheduler)
 
-Once manual ingest is reliably good (a week or two of real use), Brent sets up two scheduled tasks in Claude Code:
+**Gate:** don't turn this on until manual `/ingest` has been run for a week or two and the output is trusted. Automating a process you haven't tuned just automates the flaws — the mechanics below can be built and dry-run tested at any time, but the two Scheduled Tasks at the end shouldn't be registered until that gate is met.
 
-- Daily ~7:00 AM: run `/ingest` in this repo.
-- Sunday evening: run `/synthesize`.
+Chosen shape, per Brent's answers: capture stays manual (files dropped into local `inbox/` by hand — no voice pipeline yet), execution is a local Windows Task Scheduler job driving headless Claude Code against the local clone at `C:\Users\Brent\Documents\claudecode\llm-wiki`, cadence is daily ingest / weekly synthesis, and once trusted the job auto-pushes to `origin main` with no human in the loop.
 
-Not before: automating a process you haven't tuned just automates the flaws.
+Two things make unattended execution safe: **scoped permissions** (so headless Claude Code can act without a human approving prompts, but only for the specific tools this needs) and **a wrapper script that treats "nothing to do" as success and never force-pushes.**
+
+### 5.1 Scoped permissions — `.claude/settings.json`
+
+Headless invocation needs to run without interactive approval prompts (nobody's there to click "yes"), but a blanket bypass-all-permissions flag is more than this job needs. Add a project-level allowlist instead, so the automation can only do exactly what ingest/synthesize require — read/write files in the repo and run git:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)"
+    ]
+  }
+}
+```
+
+Verify the exact permission-string syntax and the current headless-invocation flag (`claude -p "<prompt>"` plus whatever permission-mode flag the installed CLI version uses — check `claude --help`) before wiring the wrapper script; CLI flags drift between versions and this plan shouldn't be trusted blindly over `--help`.
+
+### 5.2 Wrapper script — `scripts/run-skill.ps1`
+
+One parameterized PowerShell script, invoked with `-Skill ingest` or `-Skill synthesize`, responsible for:
+
+1. `cd` into the repo.
+2. `git pull --ff-only` — if this fails (diverged history, e.g. Brent committed from elsewhere), abort loudly before touching anything. Never force-pull or force-push.
+3. Invoke headless Claude Code with the corresponding skill prompt (`/ingest` or `/synthesize`), using the scoped permissions from 5.1.
+4. Capture all stdout/stderr to a timestamped file under `automation-logs/` (gitignored — this is operational run history, not wiki content, and is separate from `log.md`, which stays the semantic record the wiki maintainer writes about itself).
+5. Treat "inbox was empty, nothing to ingest" as success, not failure — that's the expected common case for a daily job.
+6. After the skill completes, if there are new commits: `git push`. If push fails for any reason, log it clearly and exit non-zero (so Task Scheduler's history shows a failure) — leave the local commit intact rather than retrying destructively or force-pushing.
+7. Exit 0 only when the whole sequence succeeded (including push, once auto-push is enabled).
+
+### 5.3 Task Scheduler entries
+
+Two tasks, both "run only when user is logged on" (simplest and avoids any headless-credential complications on a personal desktop), both set to not start a new instance if the previous run is still in progress:
+
+- **LLM-Wiki-Daily-Ingest** — trigger: daily, 7:00 AM. Action: `powershell.exe -ExecutionPolicy Bypass -File "C:\Users\Brent\Documents\claudecode\llm-wiki\scripts\run-skill.ps1" -Skill ingest`.
+- **LLM-Wiki-Weekly-Synthesis** — trigger: weekly, Sunday, 8:00 PM. Action: same script with `-Skill synthesize`.
+
+### 5.4 Dry-run sequence before trusting it unattended
+
+Do not register the Scheduled Tasks until these pass, in order:
+
+1. Run `scripts\run-skill.ps1 -Skill ingest` by hand from a PowerShell prompt with a real test item sitting in `inbox/` — confirm headless invocation, scoped permissions, and push all work end-to-end without any interactive prompt hanging.
+2. Run it again with `inbox/` empty — confirm it exits 0 and logs "nothing to ingest" rather than erroring.
+3. Register the two Scheduled Tasks.
+4. For the first real week, check `automation-logs/` and `git log` each morning before fully trusting it to run unattended — this is Brent's own judgment call on when to stop checking, not a step to automate away.
 
 ---
 
