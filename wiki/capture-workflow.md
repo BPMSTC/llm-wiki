@@ -1,6 +1,6 @@
 ---
 created: 2026-07-10
-updated: 2026-07-10
+updated: 2026-07-11
 ---
 
 # Capture Workflow
@@ -11,12 +11,17 @@ A convention layered on top of the [[karpathy-llm-wiki-pattern]] in [[llm-wiki-r
 
 Concretely, this means `inbox/` is the single inlet; everything else (`sources/`, `wiki/`) is built out of it by the ingest operation, never filed there directly by hand. This is additive to Karpathy's original description, which defines the [[three-layer-architecture]] and [[wiki-maintenance-operations]] but doesn't specify a capture convention — the single-inbox rule is specific to this implementation's design goals.
 
+For web content that can't be fetched plainly (login-gated pages, JS-rendered apps, image-heavy articles), the capture path is a Playwright MCP server (`playwright-web`, registered at user scope) driving a dedicated browser with a persisted profile at `C:\Users\Brent\AppData\Local\playwright-mcp-profile` — log into a site once and every later run reuses the session. This replaced driving Brent's live Chrome via the Claude-in-Chrome extension, which proved unusable for long captures: any tab switch or focus change on the shared desktop blanks screenshots and times out calls. The Playwright instance has no such contention, extracts text and lazy-loaded image URLs deterministically from the DOM, and is the only capture method compatible with unattended [[scheduled-automation]]. First proven capture: the [[fable-loop-library]] X Article (full text + 26 images).
+
 ## Related
 
 - [[llm-wiki-repo]] — the repo that implements this convention
 - [[karpathy-llm-wiki-pattern]] — the base pattern this convention is layered onto
 - [[wiki-maintenance-operations]] — ingest is the operation that empties the inbox into the other layers
+- [[scheduled-automation]] — unattended ingest depends on captures that need no human babysitting
+- [[fable-loop-library]] — the first capture made through the Playwright pipeline
 
 ## Sources
 
 - [[sources/2026-07-10-llm-wiki-repo-design]] — describes the single-inbox rationale
+- [[sources/2026-07-11-fable-loop-library]] — capture-notes.md documents the Playwright pipeline's first real run

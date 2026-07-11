@@ -1,6 +1,6 @@
 ---
 created: 2026-07-10
-updated: 2026-07-10
+updated: 2026-07-11
 ---
 
 # Karpathy LLM Wiki Pattern
@@ -19,6 +19,7 @@ Karpathy is explicit that the specific directory layout and tooling are a starti
 - [[wiki-maintenance-operations]] — the ingest/query/lint operations that keep it alive
 - [[llm-wiki-repo]] — a concrete implementation of this pattern
 - [[capture-workflow]] — an added convention layered on top in this implementation
+- [[agent-loops]] — a sibling Karpathy lineage: his agent recipe (objective, metric, boundaries) as cited by the [[fable-loop-library]]
 
 ## Sources
 
