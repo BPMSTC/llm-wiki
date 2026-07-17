@@ -10,3 +10,4 @@ Outcome values: `ok-pushed` (ran, committed, pushed), `ok-noop` (ran, nothing to
 | 2026-07-17T14:28:54 | ingest | fail-claude | 0 | 4s | claude is NOT authenticated for headless use — run 'claude setup-token' (see README > Authentication). |
 | 2026-07-17T15:25:02 | ingest | ok-noop | 0 | 31s | Nothing to ingest/synthesize. |
 | 2026-07-17T15:30:42 | ingest | fail-claude | 0 | 4m51s | claude exited with code 1. See the log for the transcript. |
+| 2026-07-17T15:37:12 | ingest | ok-pushed | 1 | 6m37s | 1 commit(s) pushed. |
