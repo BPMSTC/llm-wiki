@@ -86,6 +86,15 @@ $notInIndex = @($pageSlugs | Where-Object { -not $indexTargetSet.ContainsKey($_)
 $danglingIndex = @($indexTargets | Where-Object { -not $pageSlugSet.ContainsKey($_) } | Sort-Object -Unique)
 
 # ---------------------------------------------------------------------------
+# 1b. Repo structure drift: top-level entries outside the declared schema
+# ---------------------------------------------------------------------------
+$allowedDirs = @('inbox', 'sources', 'wiki', 'synthesis', 'scripts', 'automation-logs', '.claude', '.git', '.playwright-mcp')
+$allowedFiles = @('CLAUDE.md', 'README.md', 'PLAN.md', 'index.md', 'log.md', 'STATUS.md', '.gitignore')
+$strayEntries = @(Get-ChildItem -Path $RepoRoot -Force -ErrorAction SilentlyContinue | Where-Object {
+    if ($_.PSIsContainer) { $_.Name -notin $allowedDirs } else { $_.Name -notin $allowedFiles }
+} | ForEach-Object { if ($_.PSIsContainer) { "$($_.Name)/" } else { $_.Name } } | Sort-Object)
+
+# ---------------------------------------------------------------------------
 # 2. Inbox backlog
 # ---------------------------------------------------------------------------
 $inboxDir = Join-Path $RepoRoot "inbox"
@@ -190,6 +199,7 @@ $L.Add("")
 # Health banner
 $problems = New-Object System.Collections.Generic.List[string]
 if ($failStreak -gt 0) { $problems.Add("last $failStreak automation run(s) FAILED") }
+if ($strayEntries.Count -gt 0) { $problems.Add("$($strayEntries.Count) out-of-schema item(s) at repo root") }
 if ($danglingIndex.Count -gt 0) { $problems.Add("$($danglingIndex.Count) dangling index entr(y/ies)") }
 if ($notInIndex.Count -gt 0) { $problems.Add("$($notInIndex.Count) page(s) missing from index") }
 if ($missingWeeks.Count -gt 0) { $problems.Add("$($missingWeeks.Count) missing synthesis week(s)") }
@@ -228,6 +238,9 @@ $L.Add("")
 $L.Add("## Content")
 $L.Add("")
 $L.Add("- **Inbox backlog:** $inboxCount item(s) waiting to be ingested.")
+if ($strayEntries.Count -gt 0) {
+    $L.Add("- **Out-of-schema items at repo root:** " + (($strayEntries | ForEach-Object { "``$_``" }) -join ", ") + " — not part of any declared layer; relocate or remove (see /lint check 1).")
+}
 $L.Add("- **Last ingest:** $(DaysAgoText $lastIngest)")
 $L.Add("- **Last synthesis:** $(DaysAgoText $lastSynth)")
 if ($missingWeeks.Count -gt 0) {
