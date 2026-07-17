@@ -8,3 +8,4 @@ Outcome values: `ok-pushed` (ran, committed, pushed), `ok-noop` (ran, nothing to
 |-----------|-------|---------|---------|----------|--------|
 | 2026-07-17T11:06:29 | ingest | fail-claude | 0 | 3s | claude is NOT authenticated for headless use — run 'claude setup-token' (see README > Authentication). |
 | 2026-07-17T14:28:54 | ingest | fail-claude | 0 | 4s | claude is NOT authenticated for headless use — run 'claude setup-token' (see README > Authentication). |
+| 2026-07-17T15:25:02 | ingest | ok-noop | 0 | 31s | Nothing to ingest/synthesize. |
