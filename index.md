@@ -14,6 +14,8 @@ The catalog of every page in `wiki/`. Updated on every ingest. One line per page
 - [[agent-loops]] — the five-part anatomy of a scheduled agent job (schedule, one change, fixed check, state file, stop) plus risk tiers and cheap-first routing.
 - [[agent-goals]] — finish-line agent work: judge-in-the-conversation mechanics and the pasted-proof done contract.
 - [[fable-loop-library]] — Machina's 25-workflow library for Fable 5, the source of the loop/goal vocabulary.
+- [[agent-harness]] — the runtime layer (prompt construction, state, tool invocation, execution control) that turns a model into a working agent; harness evolution as a recurring engineering problem.
+- [[harness-handbook]] — a behavior-centric L1–L3 representation plus BGPD navigation that helps coding agents localize where a harness change belongs, without drifting from the live source.
 
 ## This Repo
 

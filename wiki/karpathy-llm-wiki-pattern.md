@@ -1,6 +1,6 @@
 ---
 created: 2026-07-10
-updated: 2026-07-11
+updated: 2026-07-17
 ---
 
 # Karpathy LLM Wiki Pattern
@@ -13,6 +13,8 @@ The pattern rests on a [[three-layer-architecture]] — immutable raw sources, a
 
 Karpathy is explicit that the specific directory layout and tooling are a starting point, not a spec: the abstraction is what matters (three layers, three operations, two supporting index/log files), and the concrete implementation should adapt to the domain. [[llm-wiki-repo]] is one such adaptation, built for Brent's own use with an added [[capture-workflow]] on top.
 
+The same bet — organize by concept/behavior instead of storage location — shows up independently in [[harness-handbook]], a representation for [[agent-harness]] codebases: it reorganizes source code around what the system *does* rather than which file it lives in, links behavior to its grounding source the way this pattern links a wiki page to its raw sources, and revalidates those links against ground truth (source code there, raw documents here) rather than trusting stale references. Neither paper cites the other; they converge on the same structural idea from opposite domains (general knowledge vs. production codebases).
+
 ## Related
 
 - [[three-layer-architecture]] — the sources/wiki/schema structure the pattern is built on
@@ -20,6 +22,7 @@ Karpathy is explicit that the specific directory layout and tooling are a starti
 - [[llm-wiki-repo]] — a concrete implementation of this pattern
 - [[capture-workflow]] — an added convention layered on top in this implementation
 - [[agent-loops]] — a sibling Karpathy lineage: his agent recipe (objective, metric, boundaries) as cited by the [[fable-loop-library]]
+- [[harness-handbook]] — an independent convergence on the same concept-over-location bet, applied to agent harness source code
 
 ## Sources
 

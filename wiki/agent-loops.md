@@ -1,6 +1,6 @@
 ---
 created: 2026-07-11
-updated: 2026-07-11
+updated: 2026-07-17
 ---
 
 # Agent Loops
@@ -21,12 +21,16 @@ Two operating rules keep loops from becoming a "token bonfire": run any loop onc
 
 This repo already runs a green-tier loop without calling it that: [[scheduled-automation]]'s daily ingest / weekly synthesize, where `log.md` plays the state-file role and "empty inbox = successful no-op" is the stop condition. The counterpart shape — a finish line instead of a cadence — is [[agent-goals]].
 
+Every loop runs inside an [[agent-harness]] — the layer that actually turns "reasoning, tool selection, action execution, observation" into real tool calls and file edits. [[harness-handbook]]'s authors describe wanting to close a localize→plan→execute→resync loop autonomously over a harness's own source, which is this same five-part anatomy (schedule/trigger, one change, a fixed check, state carried forward, a stop condition) turned inward on the harness instead of outward on a business task.
+
 ## Related
 
 - [[agent-goals]] — the other shape of autonomous work: a finish line instead of a schedule
 - [[fable-loop-library]] — 25 worked examples of this anatomy, each with a full prompt
 - [[scheduled-automation]] — this repo's own instance of the loop pattern
 - [[wiki-maintenance-operations]] — ingest/synthesize, the recurring jobs this repo loops on
+- [[agent-harness]] — the runtime layer a loop actually executes inside of
+- [[harness-handbook]] — the same loop anatomy applied to a harness resynchronizing its own behavior map
 
 ## Sources
 
