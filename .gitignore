@@ -2,5 +2,8 @@
 *.tmp
 Thumbs.db
 .DS_Store
-automation-logs/
+
+# Operational run history: verbose per-run logs stay local; the machine-readable
+# ledger (automation-logs/runs.md) and the health snapshot (STATUS.md) are committed.
+automation-logs/*.log
 .playwright-mcp/
