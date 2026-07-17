@@ -20,7 +20,10 @@ param(
     [ValidateSet("ingest", "synthesize")]
     [string]$Skill,
 
-    [string]$Model = "sonnet"
+    [string]$Model = "sonnet",
+
+    # Run everything except the git push — for local testing without touching origin.
+    [switch]$NoPush
 )
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
@@ -66,7 +69,10 @@ function Complete-Run {
 
     try { & $BuildStatus | Out-Null } catch { Write-Log "WARN: build-status.ps1 failed: $($_.Exception.Message)" }
 
-    if ($PushStatus) {
+    if ($PushStatus -and $NoPush) {
+        Write-Log "NoPush set — skipping the status commit/push (ledger + STATUS.md updated locally only)."
+    }
+    if ($PushStatus -and -not $NoPush) {
         git add automation-logs/runs.md STATUS.md 2>&1 | Out-Null
         # Only commit if those two files actually changed.
         $staged = git diff --cached --name-only 2>&1
@@ -100,19 +106,39 @@ if ($pullExit -ne 0) {
 }
 
 # 2. Invoke Claude Code headlessly, scoped to exactly what ingest/synthesize need.
+#    Resolve claude's full path — Task Scheduler's PATH may not include ~/.local/bin.
+$claudeExe = (Get-Command claude -ErrorAction SilentlyContinue).Source
+if (-not $claudeExe) {
+    $fallback = Join-Path $env:USERPROFILE ".local\bin\claude.exe"
+    if (Test-Path $fallback) { $claudeExe = $fallback }
+}
+if (-not $claudeExe) {
+    Write-Log "FATAL: 'claude' not found on PATH or at ~/.local/bin. Cannot run the skill."
+    Complete-Run -Outcome "fail-claude" -Detail "claude executable not found — check PATH / install location." -PushStatus $true
+    exit 1
+}
+
 $allowedTools = "Read Write Edit Bash(git add:*) Bash(git commit:*) Bash(git push:*) Bash(git pull:*) Bash(git status:*) Bash(git log:*) Bash(git mv:*)"
 $prompt = "/$Skill"
 
-Write-Log "Invoking: claude -p `"$prompt`" --model $Model --permission-mode acceptEdits --allowedTools `"$allowedTools`""
+Write-Log "Invoking: $claudeExe -p `"$prompt`" --model $Model --permission-mode acceptEdits --allowedTools `"$allowedTools`""
 
-$claudeOutput = "" | & claude -p $prompt --model $Model --permission-mode acceptEdits --allowedTools $allowedTools 2>&1
+$claudeOutput = "" | & $claudeExe -p $prompt --model $Model --permission-mode acceptEdits --allowedTools $allowedTools 2>&1
 $claudeExit = $LASTEXITCODE
 Add-Content -Path $LogFile -Value $claudeOutput
 
 if ($claudeExit -ne 0) {
     Write-Log "FATAL: claude exited with code $claudeExit. Not pushing wiki content."
+    # Give a targeted reason when the failure is authentication — the #1 cause of a
+    # broken unattended run, and one only Brent can fix (see README 'Authentication').
+    $joined = ($claudeOutput | Out-String)
+    if ($joined -match 'Not logged in|/login|not authenticated|Invalid API key|authentication') {
+        $detail = "claude is NOT authenticated for headless use — run 'claude setup-token' (see README > Authentication)."
+    } else {
+        $detail = "claude exited with code $claudeExit. See the log for the transcript."
+    }
     # Pull succeeded, so recording the failure to the remote is safe and useful.
-    Complete-Run -Outcome "fail-claude" -Detail "claude exited with code $claudeExit." -PushStatus $true
+    Complete-Run -Outcome "fail-claude" -Detail $detail -PushStatus $true
     exit 1
 }
 
