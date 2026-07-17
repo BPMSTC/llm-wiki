@@ -64,6 +64,22 @@ function Complete-Run {
     )
     $ts = $StartTime.ToString("yyyy-MM-ddTHH:mm:ss")
     $dur = Get-DurationText
+
+    # On a failure, check whether the skill left partial, uncommitted work behind (a
+    # mid-run crash can do this). We report it loudly rather than auto-resetting —
+    # silently nuking a working tree unattended is its own risk. Exclude the two files
+    # the wrapper itself is about to touch (the ledger and STATUS.md).
+    if ($Outcome -like 'fail-*') {
+        $partial = @(git status --porcelain 2>$null |
+            ForEach-Object { $_.Substring(3).Trim().Trim('"') } |
+            Where-Object { $_ -and $_ -notmatch 'automation-logs/runs\.md$' -and $_ -ne 'STATUS.md' })
+        if ($partial.Count -gt 0) {
+            $shown = if ($partial.Count -le 6) { $partial -join ', ' } else { (($partial | Select-Object -First 6) -join ', ') + ', ...' }
+            $Detail = "$Detail  PARTIAL WORK LEFT IN TREE ($($partial.Count) file(s): $shown) — review and clean up before the next run."
+            Write-Log "WARNING: $($partial.Count) uncommitted file(s) left in the working tree after failure: $($partial -join ', ')"
+        }
+    }
+
     $safeDetail = ($Detail -replace '\|', '/').Trim()
     Add-Content -Path $Ledger -Value "| $ts | $Skill | $Outcome | $Commits | $dur | $safeDetail |"
 

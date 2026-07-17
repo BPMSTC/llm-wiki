@@ -188,6 +188,15 @@ for ($i = $runRows.Count - 1; $i -ge 0; $i--) {
 }
 
 # ---------------------------------------------------------------------------
+# 5b. Uncommitted working-tree changes. Excludes the two files this script and the
+#     wrapper legitimately touch mid-run (the ledger and STATUS.md). Anything else
+#     is either partial-failure debris or the user's own in-progress edits.
+# ---------------------------------------------------------------------------
+$dirty = @(git -C $RepoRoot status --porcelain 2>$null |
+    ForEach-Object { $_.Substring(3).Trim().Trim('"') } |
+    Where-Object { $_ -and $_ -notmatch 'automation-logs/runs\.md$' -and $_ -ne 'STATUS.md' })
+
+# ---------------------------------------------------------------------------
 # 6. Render STATUS.md
 # ---------------------------------------------------------------------------
 $L = New-Object System.Collections.Generic.List[string]
@@ -199,6 +208,7 @@ $L.Add("")
 # Health banner
 $problems = New-Object System.Collections.Generic.List[string]
 if ($failStreak -gt 0) { $problems.Add("last $failStreak automation run(s) FAILED") }
+if ($failStreak -gt 0 -and $dirty.Count -gt 0) { $problems.Add("$($dirty.Count) uncommitted file(s) left in the working tree — likely partial-failure debris") }
 if ($strayEntries.Count -gt 0) { $problems.Add("$($strayEntries.Count) out-of-schema item(s) at repo root") }
 if ($danglingIndex.Count -gt 0) { $problems.Add("$($danglingIndex.Count) dangling index entr(y/ies)") }
 if ($notInIndex.Count -gt 0) { $problems.Add("$($notInIndex.Count) page(s) missing from index") }
@@ -229,6 +239,12 @@ $L.Add("")
 if ($failStreak -gt 0 -and $lastRun) {
     $L.Add("**Most recent run failed** — ``$($lastRun.Skill)`` at $($lastRun.Timestamp): $($lastRun.Outcome). $($lastRun.Detail)")
     $L.Add("Check the newest ``automation-logs/*.log`` for the full transcript.")
+    $L.Add("")
+}
+if ($dirty.Count -gt 0) {
+    $note = if ($failStreak -gt 0) { "A run likely failed mid-way — review and clean up before the next run." } else { "Likely your own in-progress edits; commit or discard them." }
+    $L.Add("**Uncommitted working-tree changes ($($dirty.Count)):** " + (($dirty | ForEach-Object { "``$_``" }) -join ", "))
+    $L.Add($note)
     $L.Add("")
 }
 $L.Add("Full run history: [automation-logs/runs.md](automation-logs/runs.md).")

@@ -42,7 +42,7 @@ Then confirm with `pwsh -File scripts\setup-tasks.ps1 -Action doctor` — the **
 
 Nothing fails silently. Every run — success, no-op, or failure — is recorded three ways:
 
-- **[STATUS.md](STATUS.md)** — the one page to glance at. Health banner, per-task last run/outcome, inbox backlog, staleness, missing synthesis weeks, and wiki-graph health (pages, link density, orphans, red links, index drift). Regenerated on every run by [`scripts/build-status.ps1`](scripts/build-status.ps1) (pure PowerShell, no LLM). Run `/report` for a narrative read.
+- **[STATUS.md](STATUS.md)** — the one page to glance at. Health banner, per-task last run/outcome, inbox backlog, staleness, missing synthesis weeks, wiki-graph health (pages, link density, orphans, red links, index drift), and any uncommitted work a failed run left in the tree. Regenerated on every run by [`scripts/build-status.ps1`](scripts/build-status.ps1) (pure PowerShell, no LLM). Run `/report` for a narrative read.
 - **[automation-logs/runs.md](automation-logs/runs.md)** — the committed ledger, one row per run (timestamp, skill, outcome, commits, duration). Visible from GitHub; survives a machine change.
 - **A desktop toast** fires on any failure, so a broken schedule announces itself.
 - Verbose per-run transcripts land in `automation-logs/*.log` (local-only, gitignored).
