@@ -11,3 +11,6 @@ Outcome values: `ok-pushed` (ran, committed, pushed), `ok-noop` (ran, nothing to
 | 2026-07-17T15:25:02 | ingest | ok-noop | 0 | 31s | Nothing to ingest/synthesize. |
 | 2026-07-17T15:30:42 | ingest | fail-claude | 0 | 4m51s | claude exited with code 1. See the log for the transcript. |
 | 2026-07-17T15:37:12 | ingest | ok-pushed | 1 | 6m37s | 1 commit(s) pushed. |
+| 2026-07-20T08:19:52 | ingest | fail-pull | 0 | 24s | git pull --ff-only failed (exit 128); history may have diverged. |
+| 2026-07-20T08:19:52 | synthesize | fail-pull | 0 | 24s | git pull --ff-only failed (exit 128); history may have diverged. |
+| 2026-07-21T07:00:03 | ingest | ok-noop | 0 | 38s | Nothing to ingest/synthesize. |
