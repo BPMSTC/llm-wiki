@@ -21,3 +21,6 @@ Outcome values: `ok-pushed` (ran, committed, pushed), `ok-noop` (ran, nothing to
 | 2026-08-01T07:00:03 | ingest | ok-noop | 0 | 37s | Nothing to ingest/synthesize. |
 | 2026-08-01T10:12:39 | synthesize | ok-pushed | 1 | 1m20s | 1 commit(s) pushed. |
 | 2026-08-02T09:16:31 | ingest | ok-noop | 0 | 55s | Nothing to ingest/synthesize. |
+| 2026-08-03T15:20:19 | ingest | fail-pull | 0 | 7s | git pull --ff-only failed (exit 128); history may have diverged. |
+ |
+| 2026-08-04T08:58:06 | ingest | ok-noop | 0 | 1m17s | Nothing to ingest/synthesize. |
