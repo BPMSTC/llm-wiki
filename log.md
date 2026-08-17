@@ -14,3 +14,4 @@ Format: `- YYYY-MM-DDTHH:MM <operation>: <description>`
 - 2026-07-17T15:45 ingest: 1 source (Harness Handbook arXiv paper, 2607.13285v1) → created [[harness-handbook]], [[agent-harness]]; updated [[karpathy-llm-wiki-pattern]], [[three-layer-architecture]], [[agent-loops]], [[llm-wiki-repo]] with cross-links to the new pages.
 - 2026-08-01T00:00 synthesis: wrote [[synthesis/2026-W31]] — no ingests this week (inbox empty every scheduled run, 2026-07-25 through 2026-08-01); nothing to synthesize.
 - 2026-08-09T00:00 synthesis: wrote [[synthesis/2026-W32]] — no ingests this week (inbox empty every scheduled run, 2026-08-04 through 2026-08-09); nothing to synthesize.
+- 2026-08-16T00:00 synthesis: wrote [[synthesis/2026-W33]] — no ingests this week (inbox empty every scheduled run, 2026-08-09 through 2026-08-16); nothing to synthesize.
