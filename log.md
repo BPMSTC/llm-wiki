@@ -17,3 +17,4 @@ Format: `- YYYY-MM-DDTHH:MM <operation>: <description>`
 - 2026-08-16T00:00 synthesis: wrote [[synthesis/2026-W33]] — no ingests this week (inbox empty every scheduled run, 2026-08-09 through 2026-08-16); nothing to synthesize.
 - 2026-08-30T00:00 synthesis: wrote [[synthesis/2026-W35]] — no ingests this week (inbox empty every scheduled run, 2026-08-24 through 2026-08-30); nothing to synthesize.
 - 2026-09-06T00:00 synthesis: wrote [[synthesis/2026-W36]] — no ingests this week (inbox empty every scheduled run, 2026-08-30 through 2026-09-06); nothing to synthesize.
+- 2026-09-13T00:00 synthesis: wrote [[synthesis/2026-W37]] — no ingests this week (inbox empty every scheduled run, 2026-09-07 through 2026-09-13); nothing to synthesize.
