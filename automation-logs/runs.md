@@ -128,3 +128,4 @@ Outcome values: `ok-pushed` (ran, committed, pushed), `ok-noop` (ran, nothing to
 | 2026-11-12T07:49:15 | ingest | ok-noop | 0 | 54s | Nothing to ingest/synthesize. |
 | 2026-11-14T08:37:05 | ingest | ok-noop | 0 | 31s | Nothing to ingest/synthesize. |
 | 2026-11-15T15:12:35 | ingest | fail-claude | 0 | 18s | claude exited with code 1. See the log for the transcript. |
+| 2026-11-15T20:00:03 | synthesize | fail-claude | 0 | 11s | claude exited with code 1. See the log for the transcript. |
